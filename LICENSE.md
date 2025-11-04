@@ -1,10 +1,10 @@
-Copyright (c) 2025 João Paulo Freire Motta
+Copyright (c) 2025 JPM Studios
 
 All rights reserved.
 
 This repository, including all source code, assets, documentation, scenes, prefabs,
 scripts, shaders, configurations, and any other files contained herein ("the
-Software"), is the exclusive property of João Paulo Freire Motta.
+Software"), is the exclusive property of JPM Studios.
 
 Permission is granted to view the source code for educational or reference
 purposes only.
@@ -27,4 +27,4 @@ may result in legal action.
 The author reserves all rights not explicitly granted in this license.
 
 If you wish to use any part of the Software, you MUST obtain written permission
-from the author: João Paulo Freire Motta.
+from the author: JPM Studios.
