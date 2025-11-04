@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using Domain.Entities;
+
 namespace Domain.Entities
 {
   public class Card
@@ -6,7 +10,7 @@ namespace Domain.Entities
     public string Name { get; private set; }
     public int PickaxeCost { get; private set; }
 
-    public Card(string id, string name, int cost, bool[] openPassages)
+    public Card(string id, string name, int cost)
     {
       Id = id;
       Name = name;

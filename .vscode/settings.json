@@ -67,5 +67,7 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "project-chronite.slnx"
+    "dotnet.defaultSolution": "project-chronite.slnx",
+    "editor.detectIndentation": false,
+    "editor.codeLens": false
 }
