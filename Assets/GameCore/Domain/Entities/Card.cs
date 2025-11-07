@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Domain.Entities;
 
 namespace Domain.Entities
 {
@@ -9,12 +8,14 @@ namespace Domain.Entities
     public string Id { get; }
     public string Name { get; private set; }
     public int PickaxeCost { get; private set; }
+    public string ArtworkId { get; private set; }
 
-    public Card(string id, string name, int cost)
+    public Card(string id, string name, int cost, string artworkId)
     {
       Id = id;
       Name = name;
       PickaxeCost = cost;
+      ArtworkId = artworkId;
     }
   }
 }

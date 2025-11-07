@@ -5,10 +5,12 @@ public class CardDataSO : ScriptableObject
 {
   public string Id;
   public string Name;
-  public int Cost;
+  public int PickaxeCost;
+  public string ArtworkId;
+  public Sprite Artwork;
 
   public Domain.Entities.Card ToDomain()
   {
-    return new Domain.Entities.Card(Id, Name, Cost);
+    return new Domain.Entities.Card(Id, Name, PickaxeCost, ArtworkId);
   }
 }

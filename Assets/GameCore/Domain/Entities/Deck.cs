@@ -9,6 +9,9 @@ namespace Domain.Entities
     private readonly List<Card> _drawPile = new();
     private readonly List<Card> _discardPile = new();
 
+    public int DrawPileCount => _drawPile.Count;
+    public int DiscardPileCount => _discardPile.Count;
+
     public void AddToDraw(Card c) => _drawPile.Add(c);
 
     public void AddToDiscard(Card c) => _discardPile.Add(c);

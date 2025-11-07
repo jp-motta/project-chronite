@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a7f6c619fa964344849ad8aa45d588a, type: 3}
   m_Name: Card_2
   m_EditorClassIdentifier: Assembly-CSharp::CardDataSO
-  Id: 
-  Name: 
-  Cost: 0
+  Id: 2
+  Name: Card_2
+  PickaxeCost: 0
+  ArtworkId: 2
+  Artwork: {fileID: 7482667652216324306, guid: ddff788b7e80b18418ee9e09b035552c, type: 3}
