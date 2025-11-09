@@ -3,20 +3,24 @@ using Domain.Entities;
 
 public class HandRepository : IHandRepository
 {
+  private Hand _hand;
   private readonly int maxSize;
 
-  public HandRepository(int size)
+  public HandRepository(int maxSize)
   {
-    maxSize = size;
+    this.maxSize = maxSize;
   }
 
   public Hand Load()
   {
-    return new Hand(maxSize);
+    if (_hand == null)
+      _hand = new Hand(maxSize);
+
+    return _hand;
   }
 
   public void Save(Hand hand)
   {
-    // Futuro: salvar estado? Por enquanto não é necessário.
+    _hand = hand;
   }
 }

@@ -3,6 +3,8 @@ using Domain.Entities;
 
 public class DeckRepository : IDeckRepository
 {
+  private Deck _deck;
+
   private readonly CardDatabaseSO database;
 
   public DeckRepository(CardDatabaseSO cardDatabase)
@@ -11,6 +13,19 @@ public class DeckRepository : IDeckRepository
   }
 
   public Deck Load()
+  {
+    if (_deck == null)
+      _deck = CreateDefaultDeck();
+
+    return _deck;
+  }
+
+  public void Save(Deck deck)
+  {
+    _deck = deck;
+  }
+
+  private Deck CreateDefaultDeck()
   {
     var deck = new Deck();
 
@@ -27,10 +42,5 @@ public class DeckRepository : IDeckRepository
     }
 
     return deck;
-  }
-
-  public void Save(Deck deck)
-  {
-    // Nada a salvar por enquanto — deck é recriado a cada partida.
   }
 }

@@ -24,8 +24,8 @@ public class GameTesterUI : MonoBehaviour
   private IDeckRepository deckRepo;
   private IHandRepository handRepo;
 
-  private DrawCardUseCase drawUseCase;
-  private UseCardUseCase useUseCase;
+  private DrawCardUseCase drawCardUseCase;
+  private UseCardUseCase useCardUseCase;
 
   public CardDatabaseSO database;
 
@@ -34,13 +34,10 @@ public class GameTesterUI : MonoBehaviour
     deckRepo = new DeckRepository(database);
     handRepo = new HandRepository(3);
 
-    // Inicializa deck
     var deck = deckRepo.Load();
-    foreach (var card in cardRepo.LoadAll())
-      deck.AddToDraw(card);
 
-    drawUseCase = new DrawCardUseCase(deckRepo, handRepo);
-    useUseCase = new UseCardUseCase(deckRepo, handRepo);
+    drawCardUseCase = new DrawCardUseCase(deckRepo, handRepo);
+    useCardUseCase = new UseCardUseCase(deckRepo, handRepo);
 
     drawButton.onClick.AddListener(OnDrawClicked);
     useFirstButton.onClick.AddListener(OnUseFirstClicked);
@@ -50,7 +47,7 @@ public class GameTesterUI : MonoBehaviour
 
   void OnDrawClicked()
   {
-    drawUseCase.Execute();
+    drawCardUseCase.Execute();
     RefreshUI();
   }
 
@@ -60,7 +57,7 @@ public class GameTesterUI : MonoBehaviour
     if (hand.Cards.Count > 0)
     {
       var card = hand.Cards[0];
-      useUseCase.Execute(card);
+      useCardUseCase.Execute(card);
     }
     RefreshUI();
   }
