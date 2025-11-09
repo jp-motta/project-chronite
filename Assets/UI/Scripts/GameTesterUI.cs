@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using Application.UseCases;
 using Application.Interfaces;
 using System.Diagnostics;
+using Domain.Entities;
 
 public class GameTesterUI : MonoBehaviour
 {
@@ -19,7 +20,6 @@ public class GameTesterUI : MonoBehaviour
 
   [Header("Buttons")]
   [SerializeField] private Button drawButton;
-  [SerializeField] private Button useFirstButton;
 
   private IDeckRepository deckRepo;
   private IHandRepository handRepo;
@@ -40,7 +40,6 @@ public class GameTesterUI : MonoBehaviour
     useCardUseCase = new UseCardUseCase(deckRepo, handRepo);
 
     drawButton.onClick.AddListener(OnDrawClicked);
-    useFirstButton.onClick.AddListener(OnUseFirstClicked);
 
     RefreshUI();
   }
@@ -51,14 +50,9 @@ public class GameTesterUI : MonoBehaviour
     RefreshUI();
   }
 
-  void OnUseFirstClicked()
+  private void OnCardClicked(Card card)
   {
-    var hand = handRepo.Load();
-    if (hand.Cards.Count > 0)
-    {
-      var card = hand.Cards[0];
-      useCardUseCase.Execute(card);
-    }
+    useCardUseCase.Execute(card);
     RefreshUI();
   }
 
@@ -80,6 +74,8 @@ public class GameTesterUI : MonoBehaviour
       var go = Instantiate(cardViewPrefab, handContainer);
       var view = go.GetComponent<CardView>();
       view.Setup(card, uiMapper.GetArtwork(card));
+
+      view.OnClicked = OnCardClicked;
     }
   }
 }
