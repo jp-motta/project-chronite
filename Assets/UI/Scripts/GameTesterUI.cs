@@ -9,7 +9,6 @@ using Domain.Entities;
 public class GameTesterUI : MonoBehaviour
 {
   [Header("Repos")]
-  [SerializeField] private SOCardRepository cardRepo;
   [SerializeField] private CardUIMapper uiMapper;
 
   [Header("UI")]
@@ -27,12 +26,18 @@ public class GameTesterUI : MonoBehaviour
   private DrawCardUseCase drawCardUseCase;
   private UseCardUseCase useCardUseCase;
 
-  public CardDatabaseSO database;
+  [SerializeField] private CardDatabaseSO database;
 
   private readonly List<CardView> cardViewPool = new();
 
   void Start()
   {
+    if (database == null)
+    {
+      Debug.LogError("[GameTesterUI] Database reference is missing.");
+      return;
+    }
+
     deckRepo = new DeckRepository(database);
     handRepo = new HandRepository(3);
 

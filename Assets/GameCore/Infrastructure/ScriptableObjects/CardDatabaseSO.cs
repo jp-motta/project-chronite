@@ -4,5 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CardDatabase", menuName = "Game/Cards/Card Database")]
 public class CardDatabaseSO : ScriptableObject
 {
-  public List<CardDataSO> Cards;
+  [SerializeField] private List<CardDataSO> cards = new();
+
+  public IReadOnlyList<CardDataSO> Cards => cards;
 }

@@ -15,7 +15,7 @@ public class CardUIMapper : MonoBehaviour
 
   private void Awake() => BuildMap();
 
-  public void BuildMap()
+  private void BuildMap()
   {
     _map.Clear();
 
@@ -45,11 +45,12 @@ public class CardUIMapper : MonoBehaviour
 
   public Sprite GetArtwork(Card card)
   {
-    if (card?.Id is null || card.Id.Length == 0)
+    if (card == null || string.IsNullOrWhiteSpace(card.Id))
       return defaultArtwork;
 
-    return _map.TryGetValue(card.Id, out var data) && data?.Artwork != null
-      ? data.Artwork
-      : defaultArtwork;
+    if (_map.TryGetValue(card.Id, out var data) && data is { Artwork: { } artwork })
+      return artwork;
+
+    return defaultArtwork;
   }
 }

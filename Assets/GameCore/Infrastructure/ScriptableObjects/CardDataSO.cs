@@ -1,16 +1,27 @@
 using UnityEngine;
+using UnityEngine.Serialization;
+using Domain.Entities;
 
-[CreateAssetMenu(fileName = "Card", menuName = "Game/Cards/Card")]
 public class CardDataSO : ScriptableObject
 {
-  public string Id;
-  public string Name;
-  public int PickaxeCost;
-  public string ArtworkId;
-  public Sprite Artwork;
+  [SerializeField] private string id;
 
-  public Domain.Entities.Card ToDomain()
+  [FormerlySerializedAs("name")]
+  [SerializeField] private string displayName;
+
+  [SerializeField] private int pickaxeCost;
+  [SerializeField] private string artworkId;
+  [SerializeField] private Sprite artwork;
+
+  public string Id => id;
+  public string Name => displayName;
+  public int PickaxeCost => pickaxeCost;
+  public string ArtworkId => artworkId;
+  public Sprite Artwork => artwork;
+
+  public Card ToDomain()
   {
-    return new Domain.Entities.Card(Id, Name, PickaxeCost, ArtworkId);
+    var effectiveId = string.IsNullOrWhiteSpace(Id) ? name : Id;
+    return new Card(effectiveId, Name, PickaxeCost, ArtworkId);
   }
 }
