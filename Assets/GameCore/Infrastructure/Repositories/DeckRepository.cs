@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Domain.Entities;
+using System.Linq;
 
 public class DeckRepository : IDeckRepository
 {
@@ -29,17 +30,15 @@ public class DeckRepository : IDeckRepository
   {
     var deck = new Deck();
 
-    foreach (var cardSO in database.Cards)
-    {
-      var card = new Card(
-          cardSO.Id,
-          cardSO.Name,
-          cardSO.PickaxeCost,
-          cardSO.ArtworkId
-      );
+    var cards = (database?.Cards?.ToArray() ?? System.Array.Empty<CardDataSO>())
+      .Where(c => c != null && !string.IsNullOrWhiteSpace(c.Id))
+      .Select(c => new Card(
+          c.Id,
+          c.Name,
+          c.PickaxeCost,
+          c.ArtworkId));
 
-      deck.AddToDraw(card);
-    }
+    deck.AddToDrawRange(cards);
 
     return deck;
   }

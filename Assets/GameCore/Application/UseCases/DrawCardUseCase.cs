@@ -1,3 +1,4 @@
+using Application.Common;
 using Application.Interfaces;
 using Domain.Entities;
 
@@ -5,32 +6,33 @@ namespace Application.UseCases
 {
   public class DrawCardUseCase
   {
-    private readonly IDeckRepository deckRepo;
-    private readonly IHandRepository handRepo;
+    private readonly IDeckRepository _deckRepo;
+    private readonly IHandRepository _handRepo;
 
     public DrawCardUseCase(IDeckRepository deckRepo, IHandRepository handRepo)
     {
-      this.deckRepo = deckRepo;
-      this.handRepo = handRepo;
+      _deckRepo = deckRepo;
+      _handRepo = handRepo;
     }
 
-    public Card? Execute()
+    public Result<Card> Execute()
     {
-      var deck = deckRepo.Load();
-      var hand = handRepo.Load();
+      var deck = _deckRepo.Load();
+      var hand = _handRepo.Load();
 
-      if (!hand.CanAdd)
-        return null;
+      if (hand.IsFull)
+        return Result<Card>.Failure("Hand is full");
 
       var card = deck.Draw();
+      if (card == null)
+        return Result<Card>.Failure("No cards left in deck");
 
-      if (card != null)
-        hand.Add(card);
+      hand.Add(card);
 
-      deckRepo.Save(deck);
-      handRepo.Save(hand);
+      _deckRepo.Save(deck);
+      _handRepo.Save(hand);
 
-      return card;
+      return Result<Card>.Success(card);
     }
   }
 }

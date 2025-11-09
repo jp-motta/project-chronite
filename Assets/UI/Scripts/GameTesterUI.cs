@@ -1,9 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using Application.UseCases;
 using Application.Interfaces;
-using System.Diagnostics;
 using Domain.Entities;
 
 public class GameTesterUI : MonoBehaviour
@@ -29,12 +29,12 @@ public class GameTesterUI : MonoBehaviour
 
   public CardDatabaseSO database;
 
+  private readonly List<CardView> cardViewPool = new();
+
   void Start()
   {
     deckRepo = new DeckRepository(database);
     handRepo = new HandRepository(3);
-
-    var deck = deckRepo.Load();
 
     drawCardUseCase = new DrawCardUseCase(deckRepo, handRepo);
     useCardUseCase = new UseCardUseCase(deckRepo, handRepo);
@@ -46,13 +46,19 @@ public class GameTesterUI : MonoBehaviour
 
   void OnDrawClicked()
   {
-    drawCardUseCase.Execute();
+    var result = drawCardUseCase.Execute();
+    if (!result.IsSuccess)
+      Debug.LogWarning($"[GameTesterUI] Draw failed: {result.Error}");
+
     RefreshUI();
   }
 
   private void OnCardClicked(Card card)
   {
-    useCardUseCase.Execute(card);
+    var result = useCardUseCase.Execute(card);
+    if (!result.IsSuccess)
+      Debug.LogWarning($"[GameTesterUI] Use failed: {result.Error}");
+
     RefreshUI();
   }
 
@@ -64,18 +70,28 @@ public class GameTesterUI : MonoBehaviour
     deckCountText.text = $"Deck: {deck.DrawPileCount}";
     discardCountText.text = $"Discard: {deck.DiscardPileCount}";
 
-    // limpa a mão
-    foreach (Transform child in handContainer)
-      Destroy(child.gameObject);
-
-    // recria visualmente
+    int i = 0;
     foreach (var card in hand.Cards)
     {
-      var go = Instantiate(cardViewPrefab, handContainer);
-      var view = go.GetComponent<CardView>();
-      view.Setup(card, uiMapper.GetArtwork(card));
+      CardView view;
+      if (i < cardViewPool.Count)
+      {
+        view = cardViewPool[i];
+        view.gameObject.SetActive(true);
+      }
+      else
+      {
+        var go = Instantiate(cardViewPrefab, handContainer);
+        view = go.GetComponent<CardView>();
+        cardViewPool.Add(view);
+      }
 
+      view.Setup(card, uiMapper.GetArtwork(card));
       view.OnClicked = OnCardClicked;
+      i++;
     }
+
+    for (; i < cardViewPool.Count; i++)
+      cardViewPool[i].gameObject.SetActive(false);
   }
 }

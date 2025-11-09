@@ -1,39 +1,54 @@
-using System;
 using System.Collections.Generic;
-using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Domain.Entities
 {
   public class Hand
   {
-    private readonly List<Card> _cards = new();
+    private readonly List<Card> _cards;
     private readonly int _maxSize;
 
-    public IReadOnlyList<Card> Cards => _cards;
+    public IReadOnlyList<Card> Cards => _cards.AsReadOnly();
+    public bool IsFull => _cards.Count >= _maxSize;
+    public int Count => _cards.Count;
 
     public Hand(int maxSize)
     {
-      _maxSize = maxSize;
-    }
+      if (maxSize <= 0)
+        throw new DomainException("Hand size must be greater than zero");
 
-    public bool CanAdd => _cards.Count < _maxSize;
+      _maxSize = maxSize;
+      _cards = new List<Card>(_maxSize);
+    }
 
     public void Add(Card card)
     {
-      if (!CanAdd)
-        throw new Exception("Hand is full!");
+      ValidateCard(card);
+
+      if (IsFull)
+        throw new DomainException($"Hand is full (max: {_maxSize} cards)");
 
       _cards.Add(card);
     }
 
     public void Remove(Card card)
     {
-      _cards.Remove(card);
+      ValidateCard(card);
+
+      if (!_cards.Remove(card))
+        throw new DomainException("Card not found in hand");
     }
 
     public bool Contains(Card card)
     {
+      ValidateCard(card);
       return _cards.Contains(card);
+    }
+
+    private static void ValidateCard(Card card)
+    {
+      if (card == null)
+        throw new DomainException("Card cannot be null");
     }
   }
 }

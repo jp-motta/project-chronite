@@ -2,27 +2,54 @@ using System.Collections.Generic;
 using UnityEngine;
 using Domain.Entities;
 
+[DisallowMultipleComponent]
 public class CardUIMapper : MonoBehaviour
 {
+  [Header("Data Source")]
   [SerializeField] private CardDatabaseSO database;
 
-  private Dictionary<string, CardDataSO> map;
+  [Header("Fallbacks")]
+  [SerializeField] private Sprite defaultArtwork;
 
-  void Awake()
+  private readonly Dictionary<string, CardDataSO> _map = new();
+
+  private void Awake() => BuildMap();
+
+  public void BuildMap()
   {
-    map = new Dictionary<string, CardDataSO>();
+    _map.Clear();
 
-    foreach (var c in database.Cards)
-      map[c.Id] = c;
+    if (database?.Cards == null || database.Cards.Count == 0)
+    {
+      Debug.LogWarning("[CardUIMapper] Database or Cards list is null/empty.");
+      return;
+    }
+
+    foreach (var entry in database.Cards)
+    {
+      if (entry?.Id is null || entry.Id.Trim().Length == 0)
+      {
+        Debug.LogWarning("[CardUIMapper] Skipped entry with null/empty Id.");
+        continue;
+      }
+
+      if (_map.ContainsKey(entry.Id))
+      {
+        Debug.LogWarning($"[CardUIMapper] Duplicate Id '{entry.Id}' ignored.");
+        continue;
+      }
+
+      _map[entry.Id] = entry;
+    }
   }
 
   public Sprite GetArtwork(Card card)
   {
-    if (map.TryGetValue(card.Id, out var data))
-      return data.Artwork;
+    if (card?.Id is null || card.Id.Length == 0)
+      return defaultArtwork;
 
-    Debug.LogError($"CardUIMapper: não foi encontrado artwork para a carta ID={card.Id}");
-
-    return null;
+    return _map.TryGetValue(card.Id, out var data) && data?.Artwork != null
+      ? data.Artwork
+      : defaultArtwork;
   }
 }
