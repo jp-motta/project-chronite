@@ -1,6 +1,10 @@
 namespace Domain.Entities
 {
-  public enum FeatureType { Loot, Ore, Obstacle }
+  public enum FeatureType
+  {
+    Empty,
+    Ore
+  }
 
   public class Feature
   {

@@ -30,17 +30,24 @@ public class SOGameGridRepository : IGameGridRepository
         continue;
       }
 
-      var features = new Feature[so.features?.Length ?? 0];
-      for (int i = 0; i < features.Length; i++)
+      var validFeatures = new List<Feature>();
+
+      if (so.features != null)
       {
-        features[i] = new Feature
+        foreach (var featureSO in so.features)
         {
-          Type = so.features[i].type,
-          Value = so.features[i].value
-        };
+          if (featureSO != null)
+          {
+            validFeatures.Add(new Feature
+            {
+              Type = (Domain.Entities.FeatureType)featureSO.type,
+              Value = featureSO.value
+            });
+          }
+        }
       }
 
-      var cell = new Cell(so.x, so.y, features);
+      var cell = new Cell(so.x, so.y, validFeatures.ToArray());
 
       if (so.exploredInitially)
         cell.MarkAsExplored();
