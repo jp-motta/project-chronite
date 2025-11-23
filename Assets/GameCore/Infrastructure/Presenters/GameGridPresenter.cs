@@ -5,15 +5,17 @@ using UnityEngine;
 public class GameGridPresenter : MonoBehaviour
 {
   [SerializeField] private GameObject cellPrefab;
-  [SerializeField] private float cellSize = 1f;
+  [SerializeField] private float cellSizeX = 2f;
+  [SerializeField] private float cellSizeY = 1f;
   [SerializeField] private GameGridSO gridData;
+  [Header("Cell Feature Database")]
+  [SerializeField] private CellFeatureDatabaseSO cellFeatureDatabase;
 
   private IGameGridRepository gameGridRepo;
 
   void Start()
   {
     gameGridRepo = new SOGameGridRepository(gridData);
-
     var map = gameGridRepo.Load();
     RenderMap(map);
   }
@@ -22,17 +24,49 @@ public class GameGridPresenter : MonoBehaviour
   {
     foreach (var cell in map.GetAllCells())
     {
-      var pos = new Vector3(cell.X * cellSize, cell.Y * cellSize, 0);
+      var pos = new Vector3(cell.X * cellSizeX, cell.Y * cellSizeY, 0);
       var go = Instantiate(cellPrefab, pos, Quaternion.identity, transform);
 
-      var renderer = go.GetComponent<SpriteRenderer>();
-
-      if (renderer != null)
+      var sr = go.GetComponent<SpriteRenderer>();
+      if (sr != null)
       {
-        renderer.color = cell.Explored
-          ? Color.white
-          : new Color(0.05f, 0.05f, 0.05f);
+        sr.color = cell.Explored
+          ? new Color(0.45f, 0.30f, 0.12f, 1f)
+          : new Color(0.12f, 0.08f, 0.06f, 1f);
       }
+
+      ApplyFeature(go, cell);
     }
+  }
+
+  private void ApplyFeature(GameObject parent, Cell cell)
+  {
+    var child = parent.transform.Find("Feature");
+    if (child == null) return;
+
+    var featureSr = child.GetComponent<SpriteRenderer>();
+    if (featureSr == null) return;
+
+    if (!cell.Explored)
+    {
+      featureSr.enabled = false;
+      return;
+    }
+
+    if (cellFeatureDatabase == null)
+    {
+      featureSr.enabled = false;
+      return;
+    }
+
+    if (cell.Feature == FeatureType.Empty)
+    {
+      featureSr.enabled = false;
+      return;
+    }
+
+    var sprite = cellFeatureDatabase.GetSprite(cell.Feature);
+    featureSr.sprite = sprite;
+    featureSr.enabled = sprite != null;
   }
 }

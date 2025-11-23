@@ -4,123 +4,91 @@ using Domain.Entities;
 
 public class GameGridEditorWindow : EditorWindow
 {
-  public GameGridSO map;
+  private GameGridSO grid;
   private Vector2 scroll;
 
   [MenuItem("Tools/Game Grid Editor")]
-  public static void Open()
-  {
-    GetWindow<GameGridEditorWindow>("Game Grid Editor");
-  }
+  public static void Open() => GetWindow<GameGridEditorWindow>("Game Grid");
 
   private void OnGUI()
   {
-    EditorGUILayout.Space();
-    EditorGUILayout.LabelField("Game Grid Editor", EditorStyles.boldLabel);
-
-    map = (GameGridSO)EditorGUILayout.ObjectField("Game Grid", map, typeof(GameGridSO), false);
-
-    if (map == null)
+    grid = (GameGridSO)EditorGUILayout.ObjectField("Grid Asset", grid, typeof(GameGridSO), false);
+    if (grid == null)
     {
-      EditorGUILayout.HelpBox("Selecione um GameGridSO para editar.", MessageType.Info);
+      EditorGUILayout.HelpBox("Assign a GameGridSO asset.", MessageType.Info);
       return;
     }
 
+    DrawCells();
     EditorGUILayout.Space();
-    DrawCellsList();
+    if (GUILayout.Button("Add Cell (0,0)"))
+    {
+      Undo.RecordObject(grid, "Add Cell");
+      grid.AddCell(0, 0);
+      EditorUtility.SetDirty(grid);
+      AssetDatabase.SaveAssets();
+    }
   }
 
-  private void DrawCellsList()
+  private void DrawCells()
   {
-    EditorGUILayout.LabelField("Cells", EditorStyles.boldLabel);
-
     scroll = EditorGUILayout.BeginScrollView(scroll);
-
-    for (int i = 0; i < map.cells.Length; i++)
+    for (int i = 0; i < grid.Cells.Count; i++)
     {
-      var cell = map.cells[i];
+      var c = grid.Cells[i];
       EditorGUILayout.BeginVertical("box");
-
       EditorGUILayout.BeginHorizontal();
       EditorGUILayout.LabelField($"Cell {i}", EditorStyles.boldLabel);
-
-      if (GUILayout.Button("X", GUILayout.Width(20)))
+      if (GUILayout.Button("X", GUILayout.Width(22)))
       {
-        RemoveCell(i);
-        return;
+        Undo.RecordObject(grid, "Remove Cell");
+        grid.RemoveCellAt(c.x, c.y);
+        EditorUtility.SetDirty(grid);
+        AssetDatabase.SaveAssets();
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.EndVertical();
+        break;
       }
-
       EditorGUILayout.EndHorizontal();
 
-      cell.x = EditorGUILayout.IntField("X", cell.x);
-      cell.y = EditorGUILayout.IntField("Y", cell.y);
-      cell.exploredInitially = EditorGUILayout.Toggle("Explored Initially", cell.exploredInitially);
+      int nx = EditorGUILayout.IntField("X", c.x);
+      int ny = EditorGUILayout.IntField("Y", c.y);
+      bool explored = EditorGUILayout.Toggle("Explored Initially", c.exploredInitially);
+      var feature = (FeatureType)EditorGUILayout.EnumPopup("Feature", c.feature);
 
-      SerializedObject so = new SerializedObject(map);
-      SerializedProperty cellsProp = so.FindProperty("cells");
-      SerializedProperty cellProp = cellsProp.GetArrayElementAtIndex(i);
-
-      EditorGUILayout.PropertyField(cellProp.FindPropertyRelative("features"), true);
-      so.ApplyModifiedProperties();
+      if (nx != c.x || ny != c.y || explored != c.exploredInitially || feature != c.feature)
+      {
+        Undo.RecordObject(grid, "Edit Cell");
+        c.x = nx;
+        c.y = ny;
+        c.exploredInitially = explored;
+        c.feature = feature;
+        EditorUtility.SetDirty(grid);
+        AssetDatabase.SaveAssets();
+      }
 
       EditorGUILayout.EndVertical();
     }
-
     EditorGUILayout.EndScrollView();
-
-    if (GUILayout.Button("Add Empty Cell"))
-      AddCell(0, 0);
   }
 
-  public void AddCell(int x, int y)
+  public void SetCellFeature(int x, int y, FeatureType type)
   {
-    ArrayUtility.Add(ref map.cells, new CellSO
-    {
-      x = x,
-      y = y,
-      exploredInitially = false,
-      features = new FeatureSO[0]
-    });
-
-    EditorUtility.SetDirty(map);
-  }
-
-  public void RemoveCell(int index)
-  {
-    ArrayUtility.RemoveAt(ref map.cells, index);
-    EditorUtility.SetDirty(map);
+    var cell = grid?.Find(x, y);
+    if (cell == null) return;
+    Undo.RecordObject(grid, "Set Cell Feature");
+    cell.feature = type;
+    EditorUtility.SetDirty(grid);
+    AssetDatabase.SaveAssets();
+    Repaint();
   }
 
   public void RemoveCellAt(int x, int y)
   {
-    if (map?.cells == null) return;
-    int index = System.Array.FindIndex(map.cells, c => c != null && c.x == x && c.y == y);
-    if (index < 0) return;
-    ArrayUtility.RemoveAt(ref map.cells, index);
-    EditorUtility.SetDirty(map);
-    Repaint();
-  }
-
-  public void SetCellFeature(int x, int y, FeatureType featureType)
-  {
-    if (map?.cells == null) return;
-    var cell = System.Array.Find(map.cells, c => c != null && c.x == x && c.y == y);
-    if (cell == null) return;
-
-    if (cell.features == null || cell.features.Length == 0)
-    {
-      cell.features = new FeatureSO[1];
-      cell.features[0] = new FeatureSO { type = featureType, value = 0 };
-    }
-    else
-    {
-      if (cell.features[0] == null)
-        cell.features[0] = new FeatureSO { type = featureType, value = 0 };
-      else
-        cell.features[0].type = featureType;
-    }
-
-    EditorUtility.SetDirty(map);
+    Undo.RecordObject(grid, "Remove Cell");
+    grid.RemoveCellAt(x, y);
+    EditorUtility.SetDirty(grid);
+    AssetDatabase.SaveAssets();
     Repaint();
   }
 }
