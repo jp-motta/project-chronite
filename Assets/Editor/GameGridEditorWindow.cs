@@ -10,6 +10,8 @@ public class GameGridEditorWindow : EditorWindow
   [MenuItem("Tools/Game Grid Editor")]
   public static void Open() => GetWindow<GameGridEditorWindow>("Game Grid");
 
+  public GameGridSO GetGrid() => grid;
+
   private void OnGUI()
   {
     grid = (GameGridSO)EditorGUILayout.ObjectField("Grid Asset", grid, typeof(GameGridSO), false);

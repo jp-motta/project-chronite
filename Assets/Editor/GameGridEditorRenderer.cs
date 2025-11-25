@@ -13,8 +13,7 @@ public static class GameGridEditorRenderer
     var wnd = Resources.FindObjectsOfTypeAll<GameGridEditorWindow>().FirstOrDefault();
     if (wnd == null) return;
 
-    var gridField = typeof(GameGridEditorWindow).GetField("grid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-    var grid = (GameGridSO)gridField?.GetValue(wnd);
+    var grid = wnd.GetGrid();
     if (grid == null || grid.Cells == null) return;
 
     Handles.color = Color.white;

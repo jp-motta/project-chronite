@@ -2,11 +2,11 @@ using UnityEngine;
 using Domain.Entities;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "CellFeatureMap", menuName = "Game/Features/Cell Feature Datatabase")]
+[CreateAssetMenu(fileName = "CellFeatureMap", menuName = "Game/Features/Cell Feature Database")]
 public class CellFeatureDatabaseSO : ScriptableObject
 {
   [System.Serializable]
-  private struct Entry
+  private class Entry
   {
     public FeatureType type;
     public Sprite sprite;

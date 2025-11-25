@@ -5,13 +5,15 @@ using UnityEngine;
 public class GameGridPresenter : MonoBehaviour
 {
   [SerializeField] private GameObject cellPrefab;
-  [SerializeField] private float cellSizeX = 2f;
-  [SerializeField] private float cellSizeY = 1f;
   [SerializeField] private GameGridSO gridData;
+  [SerializeField] private float cellSizeX = 1f;
+  [SerializeField] private float cellSizeY = 1f;
+
   [Header("Cell Feature Database")]
   [SerializeField] private CellFeatureDatabaseSO cellFeatureDatabase;
 
   private IGameGridRepository gameGridRepo;
+  private const string FEATURE_CHILD_NAME = "Feature";
 
   void Start()
   {
@@ -41,7 +43,7 @@ public class GameGridPresenter : MonoBehaviour
 
   private void ApplyFeature(GameObject parent, Cell cell)
   {
-    var child = parent.transform.Find("Feature");
+    var child = parent.transform.Find(FEATURE_CHILD_NAME);
     if (child == null) return;
 
     var featureSr = child.GetComponent<SpriteRenderer>();
