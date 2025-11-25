@@ -49,19 +49,11 @@ public class GameGridPresenter : MonoBehaviour
     var featureSr = child.GetComponent<SpriteRenderer>();
     if (featureSr == null) return;
 
-    if (!cell.Explored)
-    {
-      featureSr.enabled = false;
-      return;
-    }
+    bool shouldShow = cell.Explored
+                   && cellFeatureDatabase != null
+                   && cell.Feature != FeatureType.Empty;
 
-    if (cellFeatureDatabase == null)
-    {
-      featureSr.enabled = false;
-      return;
-    }
-
-    if (cell.Feature == FeatureType.Empty)
+    if (!shouldShow)
     {
       featureSr.enabled = false;
       return;
