@@ -10,11 +10,9 @@ public class CellFeatureDatabaseSO : ScriptableObject
   {
     public FeatureType type;
     public Sprite sprite;
-    public Color color;
   }
 
   [SerializeField] private List<Entry> entries = new();
-  [SerializeField] private Color fallbackColor = new Color(0.45f, 0.30f, 0.12f, 0.35f);
 
   public Sprite GetSprite(FeatureType type)
   {
@@ -22,13 +20,5 @@ public class CellFeatureDatabaseSO : ScriptableObject
       if (entries[i].type == type)
         return entries[i].sprite;
     return null;
-  }
-
-  public Color GetColor(FeatureType type)
-  {
-    for (int i = 0; i < entries.Count; i++)
-      if (entries[i].type == type)
-        return entries[i].color.a > 0 ? entries[i].color : fallbackColor;
-    return fallbackColor;
   }
 }
