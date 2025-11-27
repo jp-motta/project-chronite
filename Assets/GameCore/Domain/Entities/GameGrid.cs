@@ -4,18 +4,19 @@ namespace Domain.Entities
 {
   public class GameGrid
   {
-    private readonly Dictionary<(int, int), Cell> cells;
+    private readonly Dictionary<(int, int), Cell> _cells;
 
     public GameGrid(Dictionary<(int, int), Cell> cells)
     {
-      this.cells = cells;
+      _cells = cells;
     }
 
-    public Cell? GetCell(int x, int y)
+    public Cell GetCell(int x, int y)
     {
-      return cells.TryGetValue((x, y), out var cell) ? cell : null;
+      _cells.TryGetValue((x, y), out var c);
+      return c;
     }
 
-    public IEnumerable<Cell> GetAllCells() => cells.Values;
+    public bool Contains(int x, int y) => _cells.ContainsKey((x, y));
   }
 }
