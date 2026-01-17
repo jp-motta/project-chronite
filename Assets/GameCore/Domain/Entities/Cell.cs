@@ -10,7 +10,6 @@ namespace Domain.Entities
   {
     public int X { get; }
     public int Y { get; }
-    public bool Explored { get; private set; }
     public FeatureType Feature { get; private set; }
 
     public Cell(int x, int y, FeatureType feature = FeatureType.Empty)
@@ -21,6 +20,7 @@ namespace Domain.Entities
     }
 
     public void SetFeature(FeatureType feature) => Feature = feature;
-    public void MarkAsExplored() => Explored = true;
+
+    public bool Break() => true;
   }
 }

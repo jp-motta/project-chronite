@@ -1,9 +1,10 @@
 using Domain.Entities;
 
-namespace Application.Interfaces
+namespace Application
 {
   public interface IGameGridRepository
   {
     GameGrid Load();
+    void Save(GameGrid grid);
   }
 }
