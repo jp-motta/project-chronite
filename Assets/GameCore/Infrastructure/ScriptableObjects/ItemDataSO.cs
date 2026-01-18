@@ -4,7 +4,7 @@ using Domain.Entities;
 
 namespace Infrastructure.ScriptableObjects
 {
-  [System.Serializable]
+  [CreateAssetMenu(fileName = "NewItem", menuName = "Game/Items/Item")]
   public class ItemDataSO : ScriptableObject
   {
     [SerializeField] private string itemId;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Infrastructure.ScriptableObjects
 {
-  [CreateAssetMenu(fileName = "ItemDatabase", menuName = "Game/Item Database")]
+  [CreateAssetMenu(fileName = "ItemDatabase", menuName = "Game/Items/Item Database")]
   public class ItemDatabaseSO : ScriptableObject
   {
     [SerializeField] private List<ItemDataSO> items = new();

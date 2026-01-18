@@ -6,7 +6,22 @@ namespace Infrastructure.Repositories
 {
   public class InventoryRepository : IInventoryRepository
   {
-    private Inventory _inventory = new();
+    private static InventoryRepository instance;
+    private Inventory _inventory;
+
+    public static InventoryRepository Instance
+    {
+      get
+      {
+        instance ??= new InventoryRepository();
+        return instance;
+      }
+    }
+
+    private InventoryRepository()
+    {
+      _inventory = new Inventory();
+    }
 
     public Inventory Load()
     {
