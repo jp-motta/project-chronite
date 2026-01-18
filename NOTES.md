@@ -4,8 +4,8 @@
    Consume 1 pickaxe durability per *dig* action.  
    When pickaxe durability reaches zero, reset the level/run.
 
-2. **Implement Inventory & Item Collection System**  
-   When the player collects an item (e.g. a mineral), it is added to the inventory.
+2. ~~**Implement Inventory & Item Collection System**  
+   When the player collects an item (e.g. a mineral), it is added to the inventory.~~
 
 3. **Add New Cell Type: Coal Ore**  
    Implement a mineable coal ore cell.
