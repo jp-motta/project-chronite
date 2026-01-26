@@ -1,3 +1,4 @@
+// Presentation/Tilemap/TilemapDigController.cs
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Application;
@@ -9,7 +10,7 @@ public class TilemapDigController : MonoBehaviour
   [SerializeField] private Tilemap tilemap;
   [SerializeField] private Transform player;
   [SerializeField] private float rayDistance = 1.5f;
-  [SerializeField] private LayerMask digLayer; // defina para colisor dos tiles
+  [SerializeField] private LayerMask digLayer;
 
   [Header("Highlight")]
   [SerializeField] private Color highlightColor = new Color(1f, 1f, 1f, 0.65f);
@@ -19,6 +20,8 @@ public class TilemapDigController : MonoBehaviour
 
   private Vector3Int lastHighlightedCell;
   private bool hasHighlight;
+
+  private ItemDropOnDig itemDropOnDig;
 
   private void Awake()
   {
@@ -32,7 +35,6 @@ public class TilemapDigController : MonoBehaviour
 
   private void Update()
   {
-    // Atualiza highlight a cada frame
     UpdateHighlight();
 
     if (Keyboard.current == null)
@@ -48,9 +50,24 @@ public class TilemapDigController : MonoBehaviour
   {
     if (tilemap == null || player == null) return;
 
-    Vector3Int cellPos = GetTargetCell();
+    Vector2 dir = GetFacingVector();
+    Vector2 origin = (Vector2)player.position + dir * 0.1f;
 
-    // If changed, clear previous
+    RaycastHit2D hit = Physics2D.Raycast(origin, dir, rayDistance, digLayer);
+    Vector3Int cellPos;
+
+    if (hit.collider != null)
+    {
+      Vector2 biased = hit.point + dir * 0.01f;
+      cellPos = tilemap.WorldToCell(biased);
+    }
+    else
+    {
+      Vector3Int playerCell = tilemap.WorldToCell(player.position);
+      Vector3Int offset = DirToCellOffset(dir);
+      cellPos = playerCell + offset;
+    }
+
     if (hasHighlight && lastHighlightedCell != cellPos)
     {
       if (tilemap.HasTile(lastHighlightedCell))
@@ -61,7 +78,6 @@ public class TilemapDigController : MonoBehaviour
       hasHighlight = false;
     }
 
-    // Apply highlight if tile exists
     if (tilemap.HasTile(cellPos))
     {
       tilemap.SetTileFlags(cellPos, TileFlags.None);
@@ -73,38 +89,47 @@ public class TilemapDigController : MonoBehaviour
 
   private void TryDig()
   {
-    Vector3Int cellPos = GetTargetCell();
-    Debug.Log($"[Dig] Trying cell {cellPos}");
+    Vector2 dir = GetFacingVector();
+    Vector2 origin = (Vector2)player.position + dir * 0.1f;
+
+    RaycastHit2D hit = Physics2D.Raycast(origin, dir, rayDistance, digLayer);
+    Vector3Int cellPos;
+
+    if (hit.collider != null)
+    {
+      Vector2 biased = hit.point + dir * 0.01f;
+      cellPos = tilemap.WorldToCell(biased);
+      Debug.Log($"[Dig] Hit collider at world {hit.point}, cell {cellPos}");
+    }
+    else
+    {
+      Vector3Int playerCell = tilemap.WorldToCell(player.position);
+      Vector3Int offset = DirToCellOffset(dir);
+      cellPos = playerCell + offset;
+      Debug.Log($"[Dig] No collider hit. Fallback cell {cellPos}");
+    }
 
     DigResult result = digUseCase.Execute(cellPos.x, cellPos.y);
 
     if (result.Success)
     {
-      // Clear highlight if we removed the targeted cell
-      if (hasHighlight && lastHighlightedCell == cellPos && tilemap.HasTile(lastHighlightedCell))
+      if (hasHighlight && lastHighlightedCell == cellPos)
       {
-        tilemap.SetTileFlags(lastHighlightedCell, TileFlags.None);
-        tilemap.SetColor(lastHighlightedCell, Color.white);
         hasHighlight = false;
       }
 
       TilemapRendererUtility.RemoveCell(tilemap, result.DugCell);
       Debug.Log($"[Dig] Removed cell ({cellPos.x},{cellPos.y})");
+
+      // Notifica o sistema genérico de drops
+      if (itemDropOnDig != null)
+      {
+        itemDropOnDig.OnCellDug(cellPos, result.DugCell);
+      }
     }
     else
     {
       Debug.LogWarning("[Dig] Dig failed");
-    }
-  }
-
-  private void OnDisable()
-  {
-    // Garante limpeza do highlight ao desabilitar
-    if (hasHighlight && tilemap != null)
-    {
-      tilemap.SetTileFlags(lastHighlightedCell, TileFlags.None);
-      tilemap.SetColor(lastHighlightedCell, Color.white);
-      hasHighlight = false;
     }
   }
 
@@ -123,36 +148,20 @@ public class TilemapDigController : MonoBehaviour
     };
   }
 
-  private Vector3Int GetTargetCell()
-  {
-    if (tilemap == null || player == null) return Vector3Int.zero;
-
-    Vector2 dir = GetFacingVector();
-    Vector2 origin = (Vector2)player.position + dir * 0.1f; // avoid self-hit
-    RaycastHit2D hit = Physics2D.Raycast(origin, dir, rayDistance, digLayer);
-
-    if (hit.collider != null)
-    {
-      // Bias inside the tile along the ray direction to avoid edge-rounding issues
-      Vector2 biased = hit.point + dir * 0.01f;
-      Vector3Int cell = tilemap.WorldToCell(biased);
-      // Debug
-      Debug.Log($"[TargetCell] Hit at {hit.point} → biased {biased} → cell {cell} (dir {dir})");
-      return cell;
-    }
-
-    // Fallback to the adjacent cell in facing direction
-    Vector3Int playerCell = tilemap.WorldToCell(player.position);
-    Vector3Int offset = DirToCellOffset(dir);
-    Vector3Int target = playerCell + offset;
-    Debug.Log($"[TargetCell] No hit. Fallback playerCell {playerCell} + {offset} → {target}");
-    return target;
-  }
-
   private static Vector3Int DirToCellOffset(Vector2 dir)
   {
     int dx = dir.x > 0.5f ? 1 : dir.x < -0.5f ? -1 : 0;
     int dy = dir.y > 0.5f ? 1 : dir.y < -0.5f ? -1 : 0;
     return new Vector3Int(dx, dy, 0);
+  }
+
+  private void OnDisable()
+  {
+    if (hasHighlight && tilemap != null)
+    {
+      tilemap.SetTileFlags(lastHighlightedCell, TileFlags.None);
+      tilemap.SetColor(lastHighlightedCell, Color.white);
+      hasHighlight = false;
+    }
   }
 }

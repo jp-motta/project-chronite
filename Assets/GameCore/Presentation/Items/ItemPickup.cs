@@ -28,6 +28,11 @@ public class ItemPickup : MonoBehaviour
     }
   }
 
+  public void SetItemData(ItemDataSO data)
+  {
+    itemData = data;
+  }
+
   private void OnCollisionEnter2D(Collision2D collision)
   {
     if (collected) return;

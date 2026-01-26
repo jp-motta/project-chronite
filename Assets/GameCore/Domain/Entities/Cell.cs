@@ -3,7 +3,7 @@ namespace Domain.Entities
   public enum FeatureType
   {
     Empty = 0,
-    Ore = 1
+    IronOre = 1
   }
 
   public class Cell
