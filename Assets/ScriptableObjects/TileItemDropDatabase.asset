@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: TileItemDropDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Infrastructure.ScriptableObjects.CellItemDropDatabaseSO
   drops:
-  - tile: {fileID: 0}
+  - tile: {fileID: 11400000, guid: e2fd1a3f02f015d40bb5d663c6f800af, type: 2}
     itemDrop: {fileID: 11400000, guid: 101057ea4806d3a488600c7593917bdb, type: 2}
+    itemPickupPrefab: {fileID: 720214376177096031, guid: 7fc79ea7e6ae53b4d9c8f4a18f085d39, type: 3}

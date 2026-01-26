@@ -7,8 +7,8 @@
 2. ~~**Implement Inventory & Item Collection System**  
    When the player collects an item (e.g. a mineral), it is added to the inventory.~~
 
-3. **Add New Cell Type: Iron Ore**  
-   Implement a mineable iron ore cell.
+3. ~~**Add New Cell Type: Iron Ore**  
+   Implement a mineable iron ore cell.~~
 
 4. **Implement Card Acquisition System**  
    After digging X earth blocks (trigger), draw a card from the deck into the player’s hand.

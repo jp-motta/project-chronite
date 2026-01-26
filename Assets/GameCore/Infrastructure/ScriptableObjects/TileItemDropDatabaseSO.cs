@@ -10,7 +10,7 @@ namespace Infrastructure.ScriptableObjects
   {
     public TileBase tile;
     public ItemDataSO itemDrop;
-    public GameObject itemPickupPrefab; // Prefab específico para este drop
+    public GameObject itemPickupPrefab;
   }
 
   [CreateAssetMenu(fileName = "TileItemDropDatabase", menuName = "Game/Tile Item Drop Database")]
