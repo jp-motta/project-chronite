@@ -1,9 +1,9 @@
 // Presentation/Tilemap/TilemapDigController.cs
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using Application;
-using Domain.Entities;
 using UnityEngine.InputSystem;
+using Domain.Entities;
+using Infrastructure.ScriptableObjects;
 
 public class TilemapDigController : MonoBehaviour
 {
@@ -11,26 +11,26 @@ public class TilemapDigController : MonoBehaviour
   [SerializeField] private Transform player;
   [SerializeField] private float rayDistance = 1.5f;
   [SerializeField] private LayerMask digLayer;
+  [SerializeField] private TileItemDropDatabaseSO dropDatabase;
 
   [Header("Highlight")]
   [SerializeField] private Color highlightColor = new Color(1f, 1f, 1f, 0.65f);
 
-  private DigUseCase digUseCase;
   private PlayerDigOrientation orientation;
+  private ItemDropOnDig itemDropOnDig;
 
   private Vector3Int lastHighlightedCell;
   private bool hasHighlight;
 
-  private ItemDropOnDig itemDropOnDig;
-
   private void Awake()
   {
     orientation = player.GetComponent<PlayerDigOrientation>();
+    itemDropOnDig = FindObjectOfType<ItemDropOnDig>();
 
-    digUseCase = new DigUseCase(
-        new DigService(),
-        new UnityGameGridRepository(tilemap)
-    );
+    if (itemDropOnDig == null)
+    {
+      Debug.LogWarning("[TilemapDigController] ItemDropOnDig not found in scene");
+    }
   }
 
   private void Update()
@@ -54,19 +54,7 @@ public class TilemapDigController : MonoBehaviour
     Vector2 origin = (Vector2)player.position + dir * 0.1f;
 
     RaycastHit2D hit = Physics2D.Raycast(origin, dir, rayDistance, digLayer);
-    Vector3Int cellPos;
-
-    if (hit.collider != null)
-    {
-      Vector2 biased = hit.point + dir * 0.01f;
-      cellPos = tilemap.WorldToCell(biased);
-    }
-    else
-    {
-      Vector3Int playerCell = tilemap.WorldToCell(player.position);
-      Vector3Int offset = DirToCellOffset(dir);
-      cellPos = playerCell + offset;
-    }
+    Vector3Int cellPos = GetTargetCell(hit, dir, origin);
 
     if (hasHighlight && lastHighlightedCell != cellPos)
     {
@@ -93,51 +81,46 @@ public class TilemapDigController : MonoBehaviour
     Vector2 origin = (Vector2)player.position + dir * 0.1f;
 
     RaycastHit2D hit = Physics2D.Raycast(origin, dir, rayDistance, digLayer);
-    Vector3Int cellPos;
+    Vector3Int cellPos = GetTargetCell(hit, dir, origin);
 
+    TileBase tile = tilemap.GetTile(cellPos);
+    if (tile == null)
+    {
+      Debug.LogWarning($"[Dig] No tile at {cellPos}");
+      return;
+    }
+
+    Debug.Log($"[Dig] Digging tile {tile.name} at {cellPos}");
+
+    if (itemDropOnDig != null)
+    {
+      itemDropOnDig.OnTileAboutToDig(cellPos, tile);
+    }
+
+    tilemap.SetTile(cellPos, null);
+
+    if (hasHighlight && lastHighlightedCell == cellPos)
+    {
+      hasHighlight = false;
+    }
+  }
+
+  private Vector3Int GetTargetCell(RaycastHit2D hit, Vector2 dir, Vector2 origin)
+  {
     if (hit.collider != null)
     {
       Vector2 biased = hit.point + dir * 0.01f;
-      cellPos = tilemap.WorldToCell(biased);
-      Debug.Log($"[Dig] Hit collider at world {hit.point}, cell {cellPos}");
-    }
-    else
-    {
-      Vector3Int playerCell = tilemap.WorldToCell(player.position);
-      Vector3Int offset = DirToCellOffset(dir);
-      cellPos = playerCell + offset;
-      Debug.Log($"[Dig] No collider hit. Fallback cell {cellPos}");
+      return tilemap.WorldToCell(biased);
     }
 
-    DigResult result = digUseCase.Execute(cellPos.x, cellPos.y);
-
-    if (result.Success)
-    {
-      if (hasHighlight && lastHighlightedCell == cellPos)
-      {
-        hasHighlight = false;
-      }
-
-      TilemapRendererUtility.RemoveCell(tilemap, result.DugCell);
-      Debug.Log($"[Dig] Removed cell ({cellPos.x},{cellPos.y})");
-
-      // Notifica o sistema genérico de drops
-      if (itemDropOnDig != null)
-      {
-        itemDropOnDig.OnCellDug(cellPos, result.DugCell);
-      }
-    }
-    else
-    {
-      Debug.LogWarning("[Dig] Dig failed");
-    }
+    Vector3Int playerCell = tilemap.WorldToCell(player.position);
+    Vector3Int offset = DirToCellOffset(dir);
+    return playerCell + offset;
   }
 
   private Vector2 GetFacingVector()
   {
-    Direction d = orientation.GetDirection();
-    Debug.Log($"Direction: {d}");
-
+    var d = orientation.GetDirection();
     return d switch
     {
       Direction.Left => Vector2.left,

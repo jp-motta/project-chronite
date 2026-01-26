@@ -10,6 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3428e63354cd2c74988dd5cdbbbebb73, type: 3}
-  m_Name: CellItemDropDatabase
+  m_Name: TileItemDropDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Infrastructure.ScriptableObjects.CellItemDropDatabaseSO
-  drops: []
+  drops:
+  - tile: {fileID: 0}
+    itemDrop: {fileID: 11400000, guid: 101057ea4806d3a488600c7593917bdb, type: 2}

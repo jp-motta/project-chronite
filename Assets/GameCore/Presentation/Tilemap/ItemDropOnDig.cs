@@ -1,34 +1,42 @@
 // Presentation/Tilemap/ItemDropOnDig.cs
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using Domain.Entities;
 using Infrastructure.ScriptableObjects;
 
 public class ItemDropOnDig : MonoBehaviour
 {
   [SerializeField] private Tilemap tilemap;
-  [SerializeField] private CellItemDropDatabaseSO dropDatabase;
-  [SerializeField] private GameObject itemPickupPrefab;
+  [SerializeField] private TileItemDropDatabaseSO dropDatabase;
 
-  public void OnCellDug(Vector3Int cellPos, Cell dugCell)
+  private void Awake()
   {
-    if (dugCell == null || dropDatabase == null || itemPickupPrefab == null)
-      return;
+    if (tilemap == null)
+    {
+      tilemap = FindObjectOfType<Tilemap>();
+    }
+  }
 
-    // Consulta o banco de dados para ver se esse feature type tem drop
-    var itemDrop = dropDatabase.GetDropForFeature(dugCell.Feature);
-    if (itemDrop == null)
+  public void OnTileAboutToDig(Vector3Int cellPos, TileBase tile)
+  {
+    if (tile == null || dropDatabase == null)
+    {
       return;
+    }
 
-    // Instancia o item na posição da célula
+    var drop = dropDatabase.GetDropForTile(tile);
+    if (drop == null || drop.itemPickupPrefab == null || drop.itemDrop == null)
+    {
+      return;
+    }
+
     Vector3 worldPos = tilemap.GetCellCenterWorld(cellPos);
-    var itemPickup = Instantiate(itemPickupPrefab, worldPos, Quaternion.identity);
+    var itemPickup = Instantiate(drop.itemPickupPrefab, worldPos, Quaternion.identity);
 
-    // Atribui o item ao pickup
     var pickupComponent = itemPickup.GetComponent<ItemPickup>();
     if (pickupComponent != null)
     {
-      pickupComponent.SetItemData(itemDrop);
+      pickupComponent.SetItemData(drop.itemDrop);
+      Debug.Log($"[ItemDropOnDig] Dropped {drop.itemDrop.ItemName} at {cellPos}");
     }
   }
 }
